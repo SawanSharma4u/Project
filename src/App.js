@@ -1,23 +1,42 @@
-import logo from './logo.svg';
-import './App.css';
+import { useEffect, useState } from "react";
+import "./App.css";
+import Auth from "./pages/Auth";
+import jwtDecode from "jwt-decode";
+import Home from "./pages/Home";
+import { getUser } from "./services/api";
 
 function App() {
+  const [user, setUser] = useState(null);
+  useEffect(() => {
+    const Start = async () => {
+			const jwt = localStorage.getItem("token");
+			if (jwt) {
+        console.log(jwt)
+				const user_jwt = jwtDecode(jwt);
+        const { data } = await getUser(user_jwt._id);
+        setUser(data.data[0])
+			}
+		};
+		Start();
+  }, []);
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      <div className="navbar">
+        <h2>Auth Email</h2>
+        <h4>
+          {user ? (
+            <button onClick={() => {
+              localStorage.clear()
+              setUser(null)
+              }}>
+              {user?.fullName}
+            </button>
+          ) : (
+            "SignIn"
+          )}
+        </h4>
+      </div>
+      {user ? <Home user={user} /> : <Auth />}
     </div>
   );
 }
